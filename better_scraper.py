@@ -3,12 +3,17 @@ import time
 import lxml
 import requests
 from multiprocessing.pool import ThreadPool
+import multiprocessing
+import psutil
 from functools import partial
 from bs4 import BeautifulSoup
 import re
 from PyPDF2 import PdfFileReader
 from typing import Optional
 from typing import Literal
+import timeit
+
+start = timeit.default_timer()
 
 def fetch_subject_list():
     subject_dict = {}
@@ -111,11 +116,14 @@ def downloader(sub_code:int, year_from_to:str, paper_code:int,season:Literal["s"
             with open(file_name, 'wb') as f:
                 for data in r:
                     f.write(data)
-    results = ThreadPool(5).imap_unordered(multi_threaded_downloader, return_sub_url_with_date())
+    results = ThreadPool(int(psutil.cpu_count())).imap_unordered(multi_threaded_downloader, return_sub_url_with_date())
     for r in results:
         print(r)
-downloader("9231", "2020-2022", 21)
+downloader("9231", "2005-2022", 21)
 
+stop = timeit.default_timer()
+print('Time: ', stop - start)  
+print(psutil.cpu_count())
 '''
 To do 
 -> Make system to download entirity of papers themselves
